@@ -19,6 +19,11 @@ default:
       goutte: ~
       selenium2:
         wd_host: '{{ behat.wd_host.url }}'
+        capabilities:
+          chrome:
+            switches:
+              - "--headless"
+              - "--disable-gpu"
       javascript_session: 'selenium2'
       base-url: '{{ behat.base_url }}'
       files_path: '{{ build.platform.dir }}'
