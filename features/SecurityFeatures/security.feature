@@ -23,3 +23,13 @@ Feature: User authentication
       | admin/config    |
       | admin/structure |
 
+  @api @javascript
+  Scenario Outline: Only Administrators can access views configuration
+    Given I log in as user "Test User"
+    Then I visit "<path>"
+    Then I should see the text "You are not authorized to access this page."
+
+    Examples:
+      | path            |
+      | admin/structure/views    |
+      | admin/structure/views/settings |
