@@ -59,6 +59,10 @@ class ToolkitContext extends RawDrupalContext implements SnippetAcceptingContext
     if (module_exists(self::LOG_MODULE) && self::$handleLogModule) {
       module_disable([self::LOG_MODULE], FALSE);
     }
+
+    // Clean up 'Test User'.
+    $user = user_load_by_name('Test User');
+    user_delete($user->uid);
   }
 
   /**
