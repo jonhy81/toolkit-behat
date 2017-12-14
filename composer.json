@@ -1,6 +1,6 @@
 {
     "name": "jonhy81/toolkit-behat",
     "require": {
-        "ec-europa/toolkit": "*"
+        "behat/behat": "*"
     }
 }
