@@ -2,8 +2,8 @@ default:
   suites:
     default:
       paths:
-        - '{{ behat.dir }}/features/GenericFeatures'
-        - '{{ behat.dir }}/features/SecurityFeatures'
+        - '{{ behat.dir }}/vendor/{{ behat.generic.package }}/features/GenericFeatures'
+        - '{{ behat.dir }}/vendor/{{ behat.generic.package }}/features/SecurityFeatures'
       contexts:
         - FeatureContext
         - ToolkitContext
