@@ -13,7 +13,7 @@ Feature: User authentication
       | admin/config    |
       | admin/structure |
 
-  @api @javascript
+  @api
   Scenario Outline: Administrators can access certain administration pages
     Given I am logged in as a user with the "administrator" role
     Then I visit "<path>"
