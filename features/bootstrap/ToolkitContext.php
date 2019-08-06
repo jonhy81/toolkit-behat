@@ -32,6 +32,22 @@ class ToolkitContext extends RawDrupalContext implements SnippetAcceptingContext
       module_enable([self::LOG_MODULE], FALSE);
       self::$handleLogModule = TRUE;
     }
+
+    // Add test user with all roles available except administrator.
+    $user = user_load_by_name('Test User');
+    if (!empty($user)) {
+      user_delete($user->uid);
+    }
+    $fields = array(
+      'name' => 'Test User',
+      'mail' => 'test_user@example.com',
+      'pass' => "test_user_password",
+      'status' => 1,
+      'init' => 'email address',
+      'roles' => self::getRoles(),
+    );
+    user_save('', $fields);
+
   }
 
   /**
@@ -43,6 +59,10 @@ class ToolkitContext extends RawDrupalContext implements SnippetAcceptingContext
     if (module_exists(self::LOG_MODULE) && self::$handleLogModule) {
       module_disable([self::LOG_MODULE], FALSE);
     }
+
+    // Clean up 'Test User'.
+    $user = user_load_by_name('Test User');
+    user_delete($user->uid);
   }
 
   /**
@@ -52,6 +72,31 @@ class ToolkitContext extends RawDrupalContext implements SnippetAcceptingContext
    */
   public function assertAccessDenied() {
     $this->assertSession()->statusCodeEquals(403);
+  }
+
+  /**
+   * Login as a specified user, by name.
+   *
+   * @Given I log in as user :arg1
+   */
+  public function iLogInAsUser($arg1) {
+    $name = $arg1;
+    $pass = str_replace(' ', '_', drupal_strtolower($arg1)) . "_password";
+
+    $user = user_load_by_name($name);
+    $this->user = $user;
+
+    $this->getSession()->visit($this->locatePath('/user'));
+    $element = $this->getSession()->getPage();
+    $element->fillField('Username', $name);
+    $element->fillField('Password', $pass);
+    $submit = $element->findButton('Log in');
+
+    if (empty($submit)) {
+      throw new \Exception(sprintf("No submit button at %s", $this->getSession()->getCurrentUrl()));
+    }
+    // Log in.
+    $submit->click();
   }
 
   /**
@@ -357,6 +402,28 @@ class ToolkitContext extends RawDrupalContext implements SnippetAcceptingContext
       }
     }
     return $paths;
+  }
+
+  /**
+   * Get the list of roles present in the site.
+   *
+   * @return array
+   *   Assoc array with all roles defined in the website.
+   */
+  private static function getUserRoles() {
+    $roles = [];
+    if (module_exists('user')) {
+      $rolesDatabase = db_select('role', 'role')
+        ->fields('role', array('rid', 'name'))
+        ->condition('role.name', 'administrator', 'NOT LIKE')
+        ->execute()
+        ->fetchAll();
+
+      foreach ($rolesDatabase as $role) {
+        $roles[$role->rid] = $role->name;
+      }
+    }
+    return $roles;
   }
 
 }
